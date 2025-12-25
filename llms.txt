@@ -1,0 +1,16 @@
+Flowfull Elixir Starter — Short context for LLMs:
+
+- Phoenix 1.8+ with Bandit + Ecto + Bridge Validation (Flowless).
+- Auth via `X-Session-Id` header; server validates with `X-Bridge-Secret`.
+- DB optional, autodetected from `DATABASE_URL` (PostgreSQL, CockroachDB, MySQL, SQLite).
+- Pipelines: `:api` (optional auth), `:api_auth` (required auth).
+- Admin-only endpoints: check `user_type` in `conn.assigns[:auth_claims]`.
+- WebSocket: public channels (no auth), secure channels (require auth_claims).
+
+Common tasks:
+- Add routes in `router.ex` with appropriate pipeline.
+- DB operations using `Repo.all/1`, `Repo.get/2`, etc.
+- Create models with Ecto schemas in `lib/flowfull_elixir_starter/models/`.
+- Configure `.env` (see `docs/03-ENVIRONMENT.md`).
+
+Goal: clear, safe, and consistent responses aligned with Elixir/Phoenix conventions.

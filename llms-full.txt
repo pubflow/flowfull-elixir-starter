@@ -1,0 +1,55 @@
+Flowfull Elixir Starter — Full guide for LLMs
+
+Architecture:
+- Phoenix 1.8.3 (`lib/flowfull_elixir_starter_web/endpoint.ex`), Bandit web server.
+- Auth: `lib/flowfull_elixir_starter/auth/bridge_validator.ex` (Flowless), `middleware.ex` (required), `optional_middleware.ex` (optional).
+- DB: `lib/flowfull_elixir_starter/repo.ex` (Ecto), optional (only starts if DATABASE_URL set).
+- Router: `lib/flowfull_elixir_starter_web/router.ex` with pipelines (:browser, :api, :api_auth).
+- Controllers: `lib/flowfull_elixir_starter_web/controllers/` (page_controller.ex, sample_controller.ex).
+- Models: `lib/flowfull_elixir_starter/models/user.ex` (Ecto schema).
+- WebSocket: `lib/flowfull_elixir_starter_web/user_socket.ex`, channels in `channels/` (public_channel.ex, secure_channel.ex).
+
+Configuration:
+- `.env` with `FLOWLESS_API_URL`, `BRIDGE_VALIDATION_SECRET`, optional `DATABASE_URL`, `DEV_ALLOW_BRIDGE_STUB`, `SESSION_HEADER_NAME`, `SESSION_COOKIE_NAME`, `PORT`, `POOL_SIZE`.
+- Loaded via Dotenvy in `config/runtime.exs`, propagated to System.get_env.
+- Migrations via `mix ecto.migrate`.
+
+Patterns:
+- Bridge Validation uses `POST /auth/bridge/validate` with `X-Bridge-Secret`, returns user claims.
+- Middleware extracts session from `x-session-id` header (normalized by Plug) or `session_id` cookie.
+- Claims map stored in `conn.assigns[:auth_claims]` with keys: user_id, email, name, user_type, etc.
+- Admin routes check `user_type in ["admin", "superadmin"]`.
+- WebSocket validates session in `UserSocket.connect/3`, assigns to `socket.assigns[:auth_claims]`.
+- Public channels (`public:*`) allow unauthenticated connections.
+- Secure channels (`secure:*`) require valid auth_claims.
+- Database queries use `Repo.all/1`, `Repo.get/2`, wrapped in try/rescue for optional DB.
+- SSL configured automatically for CockroachDB with certificate verification.
+
+Best practices:
+- Use pipelines (`:api`, `:api_auth`) instead of adding plugs to individual routes.
+- Keep controller logic minimal—business logic in separate modules.
+- Use pattern matching for clean control flow.
+- Ecto schemas with @primary_key for custom IDs.
+- Error responses: 401 (unauthorized), 403 (forbidden), 404 (not found), 503 (DB unavailable).
+- Always validate required fields in Ecto changesets.
+- Use IO.inspect/2 for debugging in development.
+- Phoenix auto-reloads code in dev mode.
+
+Elixir/Phoenix conventions:
+- Module names are CamelCase, functions are snake_case.
+- Use `|>` pipe operator for data transformation chains.
+- Pattern match in function heads for clarity.
+- Return tuples like `{:ok, result}` or `{:error, reason}`.
+- Use `with` for sequential operations that can fail.
+- Prefer `defp` for private functions.
+- Use `@doc` and `@moduledoc` for documentation.
+
+Requests to the LLM should:
+- Maintain Elixir/Phoenix style and conventions.
+- Avoid adding unnecessary dependencies.
+- Propose minimal, safe changes.
+- Include concrete Mix commands when suggesting changes.
+- Use functional patterns (pattern matching, pipe operator, immutability).
+- Handle errors gracefully with try/rescue or with statements.
+
+Quick references: see `docs/` for friendly guides.

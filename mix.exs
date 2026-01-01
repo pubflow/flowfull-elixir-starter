@@ -68,7 +68,8 @@ defmodule FlowfullElixirStarter.MixProject do
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
       {:cachex, "~> 3.6"},
-      {:redix, "~> 1.2"}
+      {:redix, "~> 1.2"},
+      {:flowfull, "~> 0.1.3"}
     ]
   end
 

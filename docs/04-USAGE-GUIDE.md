@@ -177,7 +177,7 @@ defmodule FlowfullElixirStarter.Repo.Migrations.CreatePosts do
       add :published, :boolean, default: false
     end
 
-    create index(:posts, [:author_id])
+    CREATE INDEX IF NOT EXIST(:posts, [:author_id])
   end
 end
 ```

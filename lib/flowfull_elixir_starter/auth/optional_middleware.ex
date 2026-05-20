@@ -6,6 +6,7 @@ defmodule FlowfullElixirStarter.Auth.OptionalMiddleware do
 
   import Plug.Conn
   alias FlowfullElixirStarter.Auth.BridgeValidator
+  alias FlowfullElixirStarter.Security.ClientIP
 
   def init(opts), do: opts
 
@@ -15,7 +16,7 @@ defmodule FlowfullElixirStarter.Auth.OptionalMiddleware do
         conn
 
       session_id ->
-        case BridgeValidator.validate_session_id(session_id) do
+        case BridgeValidator.validate_session_id(session_id, validation_options(conn)) do
           {:ok, claims} -> assign(conn, :auth_claims, claims)
           _ -> conn
         end
@@ -37,5 +38,12 @@ defmodule FlowfullElixirStarter.Auth.OptionalMiddleware do
           _ -> nil
         end
     end
+  end
+
+  defp validation_options(conn) do
+    %{
+      ip: ClientIP.from_conn(conn),
+      user_agent: conn |> get_req_header("user-agent") |> List.first()
+    }
   end
 end

@@ -61,7 +61,9 @@ defmodule FlowfullElixirStarter.Auth.BridgeValidator do
 
   def validate_session(_), do: {:error, :invalid_claims}
 
-  def validate_session_id(session_id) when is_binary(session_id) do
+  def validate_session_id(session_id, opts \\ %{})
+
+  def validate_session_id(session_id, opts) when is_binary(session_id) do
     allow_stub? = allow_stub?()
 
     case System.get_env("FLOWLESS_API_URL") do
@@ -83,7 +85,12 @@ defmodule FlowfullElixirStarter.Auth.BridgeValidator do
           Logger.error("BRIDGE_VALIDATION_SECRET not configured")
           {:error, :no_secret}
         else
-          payload = %{session_id: session_id}
+          payload =
+            %{session_id: session_id}
+            |> maybe_put(:ip, opts[:ip])
+            |> maybe_put(:user_agent, opts[:user_agent])
+            |> maybe_put(:device_id, opts[:device_id])
+
           Logger.info("Validating session: #{String.slice(session_id, 0..7)}...")
 
           case Req.post(
@@ -153,7 +160,7 @@ defmodule FlowfullElixirStarter.Auth.BridgeValidator do
     end
   end
 
-  def validate_session_id(_), do: {:error, :invalid_session_id}
+  def validate_session_id(_, _), do: {:error, :invalid_session_id}
 
   defp bridge_headers(secret) do
     [
@@ -161,6 +168,10 @@ defmodule FlowfullElixirStarter.Auth.BridgeValidator do
       {"Content-Type", "application/json"}
     ]
   end
+
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, _key, ""), do: map
+  defp maybe_put(map, key, value), do: Map.put(map, key, value)
 
   defp allow_stub? do
     System.get_env("DEV_ALLOW_BRIDGE_STUB") in ["1", "true", "TRUE", "yes", "YES"]

@@ -12,6 +12,8 @@ defmodule FlowfullElixirStarter.Security.ClientIP do
     "x-real-ip",
     "x-client-ip",
     "x-forwarded-for",
+    "forwarded-for",
+    "x-forwarded",
     "forwarded"
   ]
 
